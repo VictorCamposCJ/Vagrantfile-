@@ -1,0 +1,41 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.define "cliente1f" do |cliente1f|
+    cliente1f.vm.box = "generic/centos9s"
+    cliente1f.vm.hostname = "Cliente1f"
+    cliente1f.vm.network :private_network, ip: "192.168.10.80"
+    cliente1f.vm.provider "virtualbox" do |v|
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--name", "cliente1f"]
+      v.customize ["modifyvm", :id, "--memory", 4096]
+      v.customize ["modifyvm", :id, "--cpus", 2]
+    end
+  $COMMANDS = <<-'BLOCK'
+  sudo yum update && sudo yum upgrade
+  sudo systemctl restart sshd
+  echo "root:vagrant" | sudo chpasswd
+  BLOCK
+  cliente1f.vm.provision "shell", inline: $COMMANDS
+  end
+
+
+  config.vm.define "cliente2f" do |cliente2f|
+    cliente2f.vm.box = "generic/debian12"
+    cliente2f.vm.hostname = "Cliente2f"
+    cliente2f.vm.network :private_network, ip: "192.168.10.90"
+    cliente2f.vm.provider "virtualbox" do |v|
+      v.customize ["modifyvm", :id, "--ioapic", "on"]
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--name", "cliente2f"]
+      v.customize ["modifyvm", :id, "--memory", 4096]
+      v.customize ["modifyvm", :id, "--cpus", 2]
+    end
+    $COMMANDS = <<-'BLOCK'
+    sudo apt-get update && sudo apt-get upgrade
+    sudo systemctl restart sshd
+    echo "root:vagrant" | sudo chpasswd
+    BLOCK
+    cliente2f.vm.provision "shell", inline: $COMMANDS
+  end
+end
